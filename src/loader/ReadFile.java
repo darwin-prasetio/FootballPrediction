@@ -23,12 +23,12 @@ public class ReadFile {
 
     public void setTrainDataSet(String dataSetName) {
         TrainDataSet=FOLDER+dataSetName;
+        parseFile();
     }
 
-    public void parseFile() {
+    private void parseFile() {
         BufferedReader reader = null;
         String line="";
-        String splitter=",";
         try {
             reader = new BufferedReader(new FileReader(TrainDataSet));
             while((line = reader.readLine())!=null) {
@@ -38,6 +38,13 @@ public class ReadFile {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        parseInstances();
+    }
+
+    private void parseInstances() {
+        for(String instance:instances) {
+            String[] attributes = instance.split(",");
         }
     }
 
