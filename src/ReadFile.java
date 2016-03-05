@@ -1,5 +1,3 @@
-package loader;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -44,7 +42,8 @@ public class ReadFile {
 
     private void parseInstances() {
         for(String instance:instances) {
-            String[] attributes = instance.split(",");
+            String[] attributes = instance.split(";");
+            System.out.println(attributes[4] + " " + attributes[5]);
         }
     }
 
