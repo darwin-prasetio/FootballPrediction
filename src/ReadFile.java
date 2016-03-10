@@ -32,6 +32,7 @@ public class ReadFile {
             while((line = reader.readLine())!=null) {
                 instances.add(line);
             }
+            instances.remove(0);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
