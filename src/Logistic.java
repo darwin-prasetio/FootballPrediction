@@ -59,7 +59,7 @@ public class Logistic {
 
     }
 
-    public List<List<Double>> matrixMatrixMultiplication(List<List<Double>> A, List<List<Double>> B) {
+    public List<List<Double>> matrixMultiplication(List<List<Double>> A, List<List<Double>> B) {
         Double[][] result = new Double[A.size()][B.get(0).size()];
         Double sum=0.0;
         for(int c=0;c<A.size();c++) {

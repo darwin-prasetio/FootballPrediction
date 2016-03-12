@@ -4,7 +4,6 @@
     <list default="true" id="5aa61641-c287-4d64-96ca-f4c235dc22a0" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/FootballPrediction/Main.class" afterPath="$PROJECT_DIR$/out/production/FootballPrediction/Main.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Logistic.java" afterPath="$PROJECT_DIR$/src/Logistic.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Main.java" afterPath="$PROJECT_DIR$/src/Main.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="FootballPrediction.iws" />
@@ -82,8 +81,8 @@
       <file leaf-file-name="Logistic.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Logistic.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.13385826">
-              <caret line="74" column="40" selection-start-line="74" selection-start-column="40" selection-end-line="74" selection-end-column="40" />
+            <state vertical-scroll-proportion="0.17847769">
+              <caret line="61" column="36" selection-start-line="61" selection-start-column="36" selection-end-line="61" selection-end-column="36" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -506,7 +505,7 @@
       <workItem from="1457607428350" duration="1352000" />
       <workItem from="1457755816995" duration="4530000" />
       <workItem from="1457762768368" duration="11347000" />
-      <workItem from="1457782894484" duration="2958000" />
+      <workItem from="1457782894484" duration="3024000" />
     </task>
     <task id="LOCAL-00001" summary="initial changes">
       <created>1456313743762</created>
@@ -556,11 +555,17 @@
       <option name="project" value="LOCAL" />
       <updated>1457774496912</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="matrix multiplication done">
+      <created>1457785899369</created>
+      <option name="number" value="00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1457785899369</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="40764000" />
+    <option name="totallyTimeSpent" value="40830000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
@@ -612,7 +617,8 @@
     <MESSAGE value="refactor, parsed instances" />
     <MESSAGE value="transpose matrix tested" />
     <MESSAGE value="parse instance tested" />
-    <option name="LAST_COMMIT_MESSAGE" value="parse instance tested" />
+    <MESSAGE value="matrix multiplication done" />
+    <option name="LAST_COMMIT_MESSAGE" value="matrix multiplication done" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1291,8 +1297,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Logistic.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.13385826">
-          <caret line="74" column="40" selection-start-line="74" selection-start-column="40" selection-end-line="74" selection-end-column="40" />
+        <state vertical-scroll-proportion="0.17847769">
+          <caret line="61" column="36" selection-start-line="61" selection-start-column="36" selection-end-line="61" selection-end-column="36" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
