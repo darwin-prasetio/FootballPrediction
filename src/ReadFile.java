@@ -38,14 +38,6 @@ public class ReadFile {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        parseInstances();
-    }
-
-    private void parseInstances() {
-        for(String instance:instances) {
-            String[] attributes = instance.split(";");
-            System.out.println(attributes[4] + " " + attributes[5]);
-        }
     }
 
     public Vector<String> getInstances() {

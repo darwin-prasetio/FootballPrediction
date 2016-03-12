@@ -52,6 +52,7 @@ public class Logistic {
     public void estimateCoefficients(Vector<String> instances) {
         setInitialCoefficients();
         parseInstances(instances);
+
     }
 
     private void parseInstances(Vector<String> instances) {
@@ -83,6 +84,10 @@ public class Logistic {
 
             Double likelihood = calculateLikelihood(probability);
             List<Double> rowOfLikelihood= new ArrayList<>(instances.size());
+            for(int j=0;j<5;j++) {
+                rowOfLikelihood.add(0.0);
+            }
+            System.out.println(rowOfLikelihood.get(0));
             rowOfLikelihood.set(i,likelihood);
             likelihoods.add(rowOfLikelihood);
             i++;
@@ -99,7 +104,7 @@ public class Logistic {
     }
 
     private void setInitialCoefficients() {
-        for(int i=0;i<coefficients.size();++i) {
+        for(int i=0;i<5;++i) {
             coefficients.add(0.0);
         }
     }
