@@ -1,3 +1,6 @@
+import javax.xml.bind.ValidationEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -6,21 +9,40 @@ import java.util.Vector;
  */
 public class Logistic {
 
-    private Vector<Double> coefficients;
-    private Vector<Double> matchResults;
-    private Vector<Vector<Double>> variables;
-    private Vector<Double> probabilities; //p
-    private Vector<Vector<Double>> likelihoods; //W = p(1-p), NxN matrix
+    private List<Double> coefficients;
+    private List<Double> matchResults; //y
+    private List<List<Double>> variables; //X
+    private List<Double> probabilities; //p
+    private List<List<Double>> likelihoods; //W = p(1-p), NxN matrix
 
-    public Logistic() {
-        coefficients = new Vector<Double>(5);
-        matchResults = new Vector<Double>();
-        variables = new Vector<Vector<Double>>();
-        likelihoods = new Vector<Vector<Double>>();
+    public void setVariables(List<List<Double>> matrix) {
+        variables=matrix;
     }
 
-    public Vector<Double> getCoefficients() {
+    public List<List<Double>> getVariables() {
+        return variables;
+    }
+
+    public Logistic() {
+        coefficients = new ArrayList<Double>(5);
+        matchResults = new ArrayList<>();
+        variables = new ArrayList<List<Double>>();
+        likelihoods = new ArrayList<List<Double>>();
+        probabilities = new ArrayList<>();
+    }
+
+    public List<Double> getCoefficients() {
         return coefficients;
+    }
+
+    public void transposeMatrix(List<List<Double>> matrix) {
+        for(int i=0;i<matrix.size();++i) {
+            for(int j=i+1;j<matrix.size();++j) {
+                Double temp = matrix.get(i).get(j);
+                matrix.get(i).set(j,matrix.get(j).get(i));
+                matrix.get(j).set(i,temp);
+            }
+        }
     }
 
     public void setCoefficients(Vector<Double> coefficients) {
@@ -46,7 +68,7 @@ public class Logistic {
             }
 
             //adding team strength to variables
-            Vector<Double> teamStrength = new Vector<Double>();
+            List<Double> teamStrength = new ArrayList<>();
             teamStrength.add(Double.valueOf(attributes[22])); //home offense
             teamStrength.add(Double.valueOf(attributes[23])); //home defense
             teamStrength.add(Double.valueOf(attributes[24])); //away offense
@@ -60,7 +82,7 @@ public class Logistic {
 
 
             Double likelihood = calculateLikelihood(probability);
-            Vector<Double> rowOfLikelihood= new Vector<Double>(instances.size());
+            List<Double> rowOfLikelihood= new ArrayList<>(instances.size());
             rowOfLikelihood.set(i,likelihood);
             likelihoods.add(rowOfLikelihood);
             i++;
@@ -71,7 +93,7 @@ public class Logistic {
         return probability*(1-probability);
     }
 
-    private Double calculateProbability(Vector<Double> coefficients, Double homeOffense, Double homeDefense, Double awayOffense, Double awayDefense) {
+    private Double calculateProbability(List<Double> coefficients, Double homeOffense, Double homeDefense, Double awayOffense, Double awayDefense) {
         return 1/(1+(1/Math.exp(coefficients.get(0)+coefficients.get(1)*homeOffense+coefficients.get(2)*homeDefense+
                         coefficients.get(3)*awayOffense+coefficients.get(4)*awayDefense)));
     }
