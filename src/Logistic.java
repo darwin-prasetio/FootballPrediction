@@ -52,7 +52,36 @@ public class Logistic {
     public void estimateCoefficients(Vector<String> instances) {
         setInitialCoefficients();
         parseInstances(instances);
+        newtonRaphson();
+    }
 
+    private void newtonRaphson() {
+
+    }
+
+    public List<List<Double>> matrixMatrixMultiplication(List<List<Double>> A, List<List<Double>> B) {
+        Double[][] result = new Double[A.size()][B.get(0).size()];
+        Double sum=0.0;
+        for(int c=0;c<A.size();c++) {
+            for(int d=0;d<B.get(0).size();d++) {
+                for(int k=0;k<B.size();k++) {
+                    sum += A.get(c).get(k) * B.get(k).get(d);
+                }
+                result[c][d]=sum;
+                sum=0.0;
+            }
+        }
+
+        List<List<Double>> resultMatrix = new ArrayList<>();
+
+        for(int j=0;j<A.size();j++) {
+            List<Double> resultRow = new ArrayList<>();
+            for (int i = 0; i < B.get(0).size(); i++) {
+                resultRow.add(result[j][i]);
+            }
+            resultMatrix.add(resultRow);
+        }
+        return resultMatrix;
     }
 
     private void parseInstances(Vector<String> instances) {
