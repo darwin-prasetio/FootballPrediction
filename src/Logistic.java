@@ -9,10 +9,11 @@ import java.util.Vector;
  */
 public class Logistic {
 
-    private List<Double> coefficients;
-    private List<Double> matchResults; //y
-    private List<List<Double>> variables; //X
-    private List<Double> probabilities; //p
+    //all is in matrix to simpify calculation
+    private List<List<Double>> coefficients; //beta values, Nx1 matrix
+    private List<List<Double>> matchResults; //y, Nx1 matrix
+    private List<List<Double>> variables; //X, Nx(p+1) matrix
+    private List<List<Double>> probabilities; //p, Nx1 matrix
     private List<List<Double>> likelihoods; //W = p(1-p), NxN matrix
 
     public void setVariables(List<List<Double>> matrix) {
@@ -24,29 +25,63 @@ public class Logistic {
     }
 
     public Logistic() {
-        coefficients = new ArrayList<Double>(5);
+        coefficients = new ArrayList<>(5);
         matchResults = new ArrayList<>();
         variables = new ArrayList<List<Double>>();
         likelihoods = new ArrayList<List<Double>>();
         probabilities = new ArrayList<>();
     }
 
-    public List<Double> getCoefficients() {
+    public List<List<Double>> getCoefficients() {
         return coefficients;
     }
 
-    public void transposeMatrix(List<List<Double>> matrix) {
-        for(int i=0;i<matrix.size();++i) {
-            for(int j=i+1;j<matrix.size();++j) {
-                Double temp = matrix.get(i).get(j);
-                matrix.get(i).set(j,matrix.get(j).get(i));
-                matrix.get(j).set(i,temp);
+    public List<List<Double>> transposeMatrix(List<List<Double>> matrix) {
+
+//        for(int i=0;i<matrix.size();++i) {
+//            for(int j=i+1;j<matrix.get(0).size();++j) {
+//                Double temp = matrix.get(i).get(j);
+//                matrix.get(i).set(j,matrix.get(j).get(i));
+//                matrix.get(j).set(i,temp);
+//            }
+//        }
+
+        Double[][] tempResult = new Double[matrix.get(0).size()][matrix.size()];
+        for(int i=0;i<matrix.size();i++) {
+            for(int j=0;j<matrix.get(0).size();j++) {
+                tempResult[j][i] = matrix.get(i).get(j);
             }
         }
+
+        List<List<Double>> result = new ArrayList<>();
+        for(int i=0;i<matrix.get(0).size();i++) {
+            List<Double> row = new ArrayList<>();
+            for(int j=0;j<matrix.size();j++) {
+                row.add(tempResult[i][j]);
+            }
+            result.add(row);
+        }
+        return result;
     }
 
-    public void setCoefficients(Vector<Double> coefficients) {
+    public void setCoefficients(List<List<Double>> coefficients) {
         this.coefficients = coefficients;
+    }
+
+    private List<List<Double>> inverse (List<List<Double>> matrix) {
+        return multiplyByConstant(transposeMatrix(cofactor(matrix)), (1.0 / determinant(matrix)));
+    }
+
+    private List<List<Double>> multiplyByConstant(List<List<Double>> lists, double v) {
+        List<List<Double>> result = new ArrayList<>();
+        for(int i=0;i<lists.size();i++) {
+            List<Double> row = new ArrayList<>();
+            for(int j=0;j<lists.get(0).size();j++) {
+                row.add(lists.get(i).get(j)*v);
+            }
+            result.add(row);
+        }
+        return result;
     }
 
     public void estimateCoefficients(Vector<String> instances) {
@@ -56,7 +91,54 @@ public class Logistic {
     }
 
     private void newtonRaphson() {
+        for(int i=0;i<matchResults.size();i++) { //iteration as much as data
+            System.out.println("iteration:" + i);
+            calculateP(coefficients,variables);
+            calculateW(probabilities);
+            coefficients = matrixAddition(coefficients, matrixMultiplication(matrixMultiplication(inverse(matrixMultiplication(transposeMatrix(variables), matrixMultiplication(likelihoods, variables))), transposeMatrix(variables)), matrixSubtraction(matchResults, probabilities)));
+        }
+    }
 
+    private List<List<Double>> matrixAddition(List<List<Double>> coefficients, List<List<Double>> matrix) {
+        List<List<Double>> newCoefficients = new ArrayList<>();
+        for(int i=0;i<matrix.size();i++) {
+            List<Double> row = new ArrayList<>(1);
+            row.add(coefficients.get(i).get(0)+matrix.get(i).get(0));
+            newCoefficients.add(row);
+        }
+        return newCoefficients;
+    }
+
+    private void calculateP(List<List<Double>> coefficients, List<List<Double>> variables) {
+        probabilities = new ArrayList<>();
+        for(int i=0;i<variables.size();i++) {
+            List<Double> probability = new ArrayList<>();
+            probability.add(calculateProbability(coefficients,variables.get(i).get(0),variables.get(i).get(1),variables.get(i).get(2),variables.get(i).get(3)));
+            probabilities.add(probability);
+        }
+    }
+
+    private void calculateW(List<List<Double>> probabilities) {
+        likelihoods = new ArrayList<>();
+        for(int i=0;i<probabilities.size();i++) {
+            Double likelihood = calculateLikelihood(probabilities.get(i));
+            List<Double> row = new ArrayList<>(probabilities.size());
+            for(int j=0;j<probabilities.size();j++) {
+                row.add(0.0);
+            }
+            row.set(i,likelihood);
+            likelihoods.add(row);
+        }
+    }
+
+    private List<List<Double>> matrixSubtraction(List<List<Double>> matchResults, List<List<Double>> probabilities) {
+        List<List<Double>> result = new ArrayList<>();
+        for(int i=0;i<matchResults.size();i++) {
+            List<Double> row = new ArrayList<>();
+            row.add(matchResults.get(i).get(0) - probabilities.get(i).get(0));
+            result.add(row);
+        }
+        return result;
     }
 
     public List<List<Double>> matrixMultiplication(List<List<Double>> A, List<List<Double>> B) {
@@ -85,56 +167,121 @@ public class Logistic {
     }
 
     private void parseInstances(Vector<String> instances) {
-        int i=0;
+//        int i=0;
         for(String instance:instances) {
             String[] attributes = instance.split(";");
-
+            List<Double> matchResult = new ArrayList<>();
             //adding match results to matchResults Vector, ignore draw results
             if(attributes[6].equals("H")) {
-                matchResults.add(1.0);
+                matchResult.add(1.0);
             }
             else if(attributes[6].equals("A")) {
-                matchResults.add(0.0);
+                matchResult.add(0.0);
             }
+            matchResults.add(matchResult);
 
             //adding team strength to variables
-            List<Double> teamStrength = new ArrayList<>();
-            teamStrength.add(Double.valueOf(attributes[22])); //home offense
-            teamStrength.add(Double.valueOf(attributes[23])); //home defense
-            teamStrength.add(Double.valueOf(attributes[24])); //away offense
-            teamStrength.add(Double.valueOf(attributes[25])); //away defense
-            variables.add(teamStrength);
+            List<Double> variable = new ArrayList<>();
+            variable.add(1.0); //intercept assumption
+            variable.add(Double.valueOf(attributes[22])); //home offense
+            variable.add(Double.valueOf(attributes[23])); //home defense
+            variable.add(Double.valueOf(attributes[24])); //away offense
+            variable.add(Double.valueOf(attributes[25])); //away defense
+            variables.add(variable);
 
             //calculate probability and add to vector probability
-            Double probability = calculateProbability(coefficients,Double.valueOf(attributes[22]),Double.valueOf(attributes[23])
-                                                        ,Double.valueOf(attributes[24]),Double.valueOf(attributes[25]));
-            probabilities.add(probability);
+//            List<Double> probability = new ArrayList<>();
+//            probability.add(calculateProbability(coefficients, Double.valueOf(attributes[22]), Double.valueOf(attributes[23])
+//                    , Double.valueOf(attributes[24]), Double.valueOf(attributes[25])));
+//            probabilities.add(probability);
 
 
-            Double likelihood = calculateLikelihood(probability);
-            List<Double> rowOfLikelihood= new ArrayList<>(instances.size());
-            for(int j=0;j<5;j++) {
-                rowOfLikelihood.add(0.0);
-            }
-            System.out.println(rowOfLikelihood.get(0));
-            rowOfLikelihood.set(i,likelihood);
-            likelihoods.add(rowOfLikelihood);
-            i++;
+//            Double likelihood = calculateLikelihood(probability);
+//            List<Double> rowOfLikelihood= new ArrayList<>(instances.size());
+//            for(int j=0;j<5;j++) {
+//                rowOfLikelihood.add(0.0);
+//            }
+//            rowOfLikelihood.set(i,likelihood);
+//            likelihoods.add(rowOfLikelihood);
+//            i++;
         }
     }
 
-    private Double calculateLikelihood(Double probability) {
-        return probability*(1-probability);
+    private Double calculateLikelihood(List<Double> probability) {
+        return probability.get(0)*(1-probability.get(0));
     }
 
-    private Double calculateProbability(List<Double> coefficients, Double homeOffense, Double homeDefense, Double awayOffense, Double awayDefense) {
-        return 1/(1+(1/Math.exp(coefficients.get(0)+coefficients.get(1)*homeOffense+coefficients.get(2)*homeDefense+
-                        coefficients.get(3)*awayOffense+coefficients.get(4)*awayDefense)));
+    private Double calculateProbability(List<List<Double>> coefficients, Double homeOffense, Double homeDefense, Double awayOffense, Double awayDefense) {
+        return 1/(1+(1/Math.exp(coefficients.get(0).get(0)+coefficients.get(1).get(0)*homeOffense+coefficients.get(2).get(0)*homeDefense+
+                        coefficients.get(3).get(0)*awayOffense+coefficients.get(4).get(0)*awayDefense)));
     }
 
     private void setInitialCoefficients() {
         for(int i=0;i<5;++i) {
-            coefficients.add(0.0);
+            List<Double> coefficient = new ArrayList<>();
+            coefficient.add(0.0);
+            coefficients.add(coefficient);
         }
+    }
+
+    private Double determinant(List<List<Double>> matrix) {
+        if(matrix.size()==2) {
+            return ((matrix.get(0).get(0) * matrix.get(1).get(1)) - (matrix.get(0).get(1) * matrix.get(1).get(0)));
+        }
+        Double sum = 0.0;
+        for(int i=0;i < matrix.get(0).size(); ++i) {
+            sum += changeSign(i) * matrix.get(0).get(i) * determinant(createSubMatrix(matrix, 0, i));
+        }
+        return sum;
+    }
+
+    private Double changeSign(int i) {
+        return (i%2==0?1.0:-1.0);
+    }
+
+    private List<List<Double>> createSubMatrix(List<List<Double>> matrix, int excludingRow, int excludingCol) {
+        Double[][] mat = new Double[matrix.size()-1][matrix.get(0).size()-1];
+        int r = -1;
+        for(int i=0;i<matrix.size();i++) {
+            if(i==excludingRow)
+                continue;
+                r++;
+                int c=-1;
+            for(int j=0;j<matrix.get(0).size();j++) {
+                if(j==excludingCol)
+                    continue;
+                mat[r][++c] = matrix.get(i).get(j);
+            }
+        }
+
+        List<List<Double>> resultMatrix = new ArrayList<>();
+
+        for(int j=0;j<mat.length;j++) {
+            List<Double> resultRow = new ArrayList<>();
+            for (int i = 0; i < mat[0].length; i++) {
+                resultRow.add(mat[j][i]);
+            }
+            resultMatrix.add(resultRow);
+        }
+        return resultMatrix;
+    }
+
+    private List<List<Double>> cofactor(List<List<Double>> matrix) {
+        Double[][] mat = new Double[matrix.size()][matrix.get(0).size()];
+        for(int i=0;i<matrix.size();i++) {
+            for(int j=0;j<matrix.get(0).size();j++) {
+                mat[i][j] = changeSign(i) * changeSign(j) * determinant(createSubMatrix(matrix,i,j));
+            }
+        }
+        List<List<Double>> resultMatrix = new ArrayList<>();
+
+        for(int j=0;j<mat.length;j++) {
+            List<Double> resultRow = new ArrayList<>();
+            for (int i = 0; i < mat[0].length; i++) {
+                resultRow.add(mat[j][i]);
+            }
+            resultMatrix.add(resultRow);
+        }
+        return resultMatrix;
     }
 }
