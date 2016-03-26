@@ -1,8 +1,7 @@
-import com.sun.org.apache.xpath.internal.SourceTree;
+package Prediction;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Created by Pavilion on 24/02/2016.
