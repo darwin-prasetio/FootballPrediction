@@ -37,15 +37,6 @@ public class Logistic {
     }
 
     public List<List<Double>> transposeMatrix(List<List<Double>> matrix) {
-
-//        for(int i=0;i<matrix.size();++i) {
-//            for(int j=i+1;j<matrix.get(0).size();++j) {
-//                Double temp = matrix.get(i).get(j);
-//                matrix.get(i).set(j,matrix.get(j).get(i));
-//                matrix.get(j).set(i,temp);
-//            }
-//        }
-
         Double[][] tempResult = new Double[matrix.get(0).size()][matrix.size()];
         for(int i=0;i<matrix.size();i++) {
             for(int j=0;j<matrix.get(0).size();j++) {
@@ -68,8 +59,9 @@ public class Logistic {
         this.coefficients = coefficients;
     }
 
-    private List<List<Double>> inverse (List<List<Double>> matrix) {
-        return multiplyByConstant(transposeMatrix(cofactor(matrix)), (1.0 / determinant(matrix)));
+    public List<List<Double>> inverse (List<List<Double>> matrix) {
+        List<List<Double>> result = multiplyByConstant(transposeMatrix(cofactor(matrix)), (1.0 / determinant(matrix)));
+            return result;
     }
 
     private List<List<Double>> multiplyByConstant(List<List<Double>> lists, double v) {
@@ -99,7 +91,7 @@ public class Logistic {
         }
     }
 
-    private List<List<Double>> matrixAddition(List<List<Double>> coefficients, List<List<Double>> matrix) {
+    public List<List<Double>> matrixAddition(List<List<Double>> coefficients, List<List<Double>> matrix) {
         List<List<Double>> newCoefficients = new ArrayList<>();
         for(int i=0;i<matrix.size();i++) {
             List<Double> row = new ArrayList<>(1);
@@ -113,7 +105,7 @@ public class Logistic {
         probabilities = new ArrayList<>();
         for(int i=0;i<variables.size();i++) {
             List<Double> probability = new ArrayList<>();
-            probability.add(calculateProbability(coefficients,variables.get(i).get(0),variables.get(i).get(1),variables.get(i).get(2),variables.get(i).get(3)));
+            probability.add(calculateProbability(coefficients,variables.get(i).get(0),variables.get(i).get(1),variables.get(i).get(2),variables.get(i).get(3),variables.get(i).get(4)));
             probabilities.add(probability);
         }
     }
@@ -131,7 +123,7 @@ public class Logistic {
         }
     }
 
-    private List<List<Double>> matrixSubtraction(List<List<Double>> matchResults, List<List<Double>> probabilities) {
+    public List<List<Double>> matrixSubtraction(List<List<Double>> matchResults, List<List<Double>> probabilities) {
         List<List<Double>> result = new ArrayList<>();
         for(int i=0;i<matchResults.size();i++) {
             List<Double> row = new ArrayList<>();
@@ -169,7 +161,7 @@ public class Logistic {
     private void parseInstances(Vector<String> instances) {
 //        int i=0;
         for(String instance:instances) {
-            String[] attributes = instance.split(";");
+            String[] attributes = instance.split(",");
             List<Double> matchResult = new ArrayList<>();
             //adding match results to matchResults Vector, ignore draw results
             if(attributes[6].equals("H")) {
@@ -183,27 +175,11 @@ public class Logistic {
             //adding team strength to variables
             List<Double> variable = new ArrayList<>();
             variable.add(1.0); //intercept assumption
-            variable.add(Double.valueOf(attributes[22])); //home offense
-            variable.add(Double.valueOf(attributes[23])); //home defense
-            variable.add(Double.valueOf(attributes[24])); //away offense
-            variable.add(Double.valueOf(attributes[25])); //away defense
+            variable.add(Double.valueOf(attributes[23])); //home offense
+            variable.add(Double.valueOf(attributes[24])); //home defense
+            variable.add(Double.valueOf(attributes[25])); //away offense
+            variable.add(Double.valueOf(attributes[26])); //away defense
             variables.add(variable);
-
-            //calculate probability and add to vector probability
-//            List<Double> probability = new ArrayList<>();
-//            probability.add(calculateProbability(coefficients, Double.valueOf(attributes[22]), Double.valueOf(attributes[23])
-//                    , Double.valueOf(attributes[24]), Double.valueOf(attributes[25])));
-//            probabilities.add(probability);
-
-
-//            Double likelihood = calculateLikelihood(probability);
-//            List<Double> rowOfLikelihood= new ArrayList<>(instances.size());
-//            for(int j=0;j<5;j++) {
-//                rowOfLikelihood.add(0.0);
-//            }
-//            rowOfLikelihood.set(i,likelihood);
-//            likelihoods.add(rowOfLikelihood);
-//            i++;
         }
     }
 
@@ -211,9 +187,10 @@ public class Logistic {
         return probability.get(0)*(1-probability.get(0));
     }
 
-    private Double calculateProbability(List<List<Double>> coefficients, Double homeOffense, Double homeDefense, Double awayOffense, Double awayDefense) {
-        return 1/(1+(1/Math.exp(coefficients.get(0).get(0)+coefficients.get(1).get(0)*homeOffense+coefficients.get(2).get(0)*homeDefense+
-                        coefficients.get(3).get(0)*awayOffense+coefficients.get(4).get(0)*awayDefense)));
+    private Double calculateProbability(List<List<Double>> coefficients,Double interceptConstant, Double homeOffense, Double homeDefense, Double awayOffense, Double awayDefense) {
+        Double sum = -1.0*(coefficients.get(0).get(0)*interceptConstant + coefficients.get(1).get(0)*homeOffense + coefficients.get(2).get(0)*homeDefense +
+                coefficients.get(3).get(0)*awayOffense + coefficients.get(4).get(0)*awayDefense);
+        return 1/(1+Math.exp(sum));
     }
 
     private void setInitialCoefficients() {
