@@ -27,6 +27,7 @@ public class ReadFile {
     }
 
     private void parseFile() {
+        instances = new Vector<>();
         BufferedReader reader = null;
         String line="";
         try {
