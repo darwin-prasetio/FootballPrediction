@@ -2,6 +2,7 @@ package Prediction;
 
 import javax.xml.bind.ValidationEvent;
 import java.util.ArrayList;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Vector;
 
@@ -110,7 +111,8 @@ public class Logistic {
         for(int i=0;i<variables.size();i++) {
             List<Double> probability = new ArrayList<>();
             probability.add(new Double(calculateProbability(coefficients,variables.get(i).get(0),variables.get(i).get(1)
-                    ,variables.get(i).get(2),variables.get(i).get(3),variables.get(i).get(4))));
+                    ,variables.get(i).get(2),variables.get(i).get(3),variables.get(i).get(4)/*,variables.get(i).get(5),
+                    variables.get(i).get(6)*/)));
             probabilities.add(probability);
         }
     }
@@ -185,6 +187,8 @@ public class Logistic {
             variable.add(new Double(Double.valueOf(attributes[24]))); //home defense
             variable.add(new Double(Double.valueOf(attributes[25]))); //away offense
             variable.add(new Double(Double.valueOf(attributes[26]))); //away defense
+//            variable.add(new Double(Double.valueOf(attributes[13]))); //home shots on target
+//            variable.add(new Double(Double.valueOf(attributes[14]))); //away SoT
             variables.add(variable);
         }
     }
@@ -193,9 +197,11 @@ public class Logistic {
         return new Double(probability.get(0)*(1.0-probability.get(0)));
     }
 
-    private Double calculateProbability(List<List<Double>> coefficients,Double interceptConstant, Double homeOffense, Double homeDefense, Double awayOffense, Double awayDefense) {
+    private Double calculateProbability(List<List<Double>> coefficients,Double interceptConstant, Double homeOffense, Double homeDefense,
+                                        Double awayOffense, Double awayDefense/*, Double homeOnTarget, Double awayOnTarget*/) {
         Double sum = new Double(-1.0*(coefficients.get(0).get(0)*interceptConstant + coefficients.get(1).get(0)*homeOffense + coefficients.get(2).get(0)*homeDefense +
-                coefficients.get(3).get(0)*awayOffense + coefficients.get(4).get(0)*awayDefense));
+                coefficients.get(3).get(0)*awayOffense + coefficients.get(4).get(0)*awayDefense /*+ coefficients.get(5).get(0)* homeOnTarget +
+                coefficients.get(6).get(0)*awayOnTarget*/));
         if(sum.equals(-0.0))
             sum = new Double(0.0);
         return new Double(1.0/(1.0+Math.exp(sum)));
@@ -285,7 +291,8 @@ public class Logistic {
         List<Double> predict = new ArrayList<>();
         for(int i=0;i<variables.size();i++) {
             if(calculateProbability(coefficients, variables.get(i).get(0), variables.get(i).get(1),
-                    variables.get(i).get(2), variables.get(i).get(3), variables.get(i).get(4))>0.5)
+                    variables.get(i).get(2), variables.get(i).get(3), variables.get(i).get(4)/*, variables.get(i).get(5),
+                    variables.get(i).get(6)*/)>0.5)
                 predict.add(new Double(1.0));
             else
                 predict.add(new Double(0.0));
@@ -294,7 +301,6 @@ public class Logistic {
         //count
         double sum = 0.0;
         for(int i=0;i<matchResults.size();i++) {
-            System.out.println(predict.get(i) + " " + matchResults.get(i).get(0));
             if(predict.get(i).equals(matchResults.get(i).get(0))) {
                 sum++;
             }
