@@ -14,7 +14,6 @@ public class ReadFile {
 
     private final String FOLDER="dataset/";
     private String TrainDataSet;
-    private String TestDataSet;
     private Vector<String> instances;
 
     public ReadFile() {

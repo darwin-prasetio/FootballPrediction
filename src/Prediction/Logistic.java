@@ -1,8 +1,6 @@
 package Prediction;
 
-import javax.xml.bind.ValidationEvent;
 import java.util.ArrayList;
-import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Vector;
 
@@ -18,14 +16,7 @@ public class Logistic {
     private List<List<Double>> variables; //X, Nx(p+1) matrix
     private List<List<Double>> probabilities; //p, Nx1 matrix
     private List<List<Double>> likelihoods; //W = p(1-p), NxN matrix
-
-    public void setVariables(List<List<Double>> matrix) {
-        variables=matrix;
-    }
-
-    public List<List<Double>> getVariables() {
-        return variables;
-    }
+    private Vector<Team> teams;
 
     public Logistic() {
         coefficients = new ArrayList<>(5);
@@ -33,6 +24,7 @@ public class Logistic {
         variables = new ArrayList<>();
         likelihoods = new ArrayList<>();
         probabilities = new ArrayList<>();
+        teams = new Vector<>();
     }
 
     public List<List<Double>> getCoefficients() {
@@ -56,10 +48,6 @@ public class Logistic {
             result.add(row);
         }
         return result;
-    }
-
-    public void setCoefficients(List<List<Double>> coefficients) {
-        this.coefficients = coefficients;
     }
 
     public List<List<Double>> inverse (List<List<Double>> matrix) {
@@ -96,7 +84,7 @@ public class Logistic {
         }
     }
 
-    public List<List<Double>> matrixAddition(List<List<Double>> coefficients, List<List<Double>> matrix) {
+    private List<List<Double>> matrixAddition(List<List<Double>> coefficients, List<List<Double>> matrix) {
         List<List<Double>> newCoefficients = new ArrayList<>();
         for(int i=0;i<matrix.size();i++) {
             List<Double> row = new ArrayList<>();
@@ -130,7 +118,7 @@ public class Logistic {
         }
     }
 
-    public List<List<Double>> matrixSubtraction(List<List<Double>> matchResults, List<List<Double>> probabilities) {
+    private List<List<Double>> matrixSubtraction(List<List<Double>> matchResults, List<List<Double>> probabilities) {
         List<List<Double>> result = new ArrayList<>();
         for(int i=0;i<matchResults.size();i++) {
             List<Double> row = new ArrayList<>();
@@ -140,7 +128,7 @@ public class Logistic {
         return result;
     }
 
-    public List<List<Double>> matrixMultiplication(List<List<Double>> A, List<List<Double>> B) {
+    private List<List<Double>> matrixMultiplication(List<List<Double>> A, List<List<Double>> B) {
         Double[][] result = new Double[A.size()][B.get(0).size()];
         Double sum=new Double(0.0);
         for(int c=0;c<A.size();c++) {
@@ -168,9 +156,11 @@ public class Logistic {
     public void parseInstances(Vector<String> instances) {
         matchResults = new ArrayList<>();
         variables = new ArrayList<>();
+        teams = new Vector<>();
         for(String instance:instances) {
             String[] attributes = instance.split(",");
             List<Double> matchResult = new ArrayList<>();
+
             //adding match results to matchResults Vector, ignore draw results
             if(attributes[6].equals("H")) {
                 matchResult.add(new Double(1.0));
@@ -190,7 +180,21 @@ public class Logistic {
 //            variable.add(new Double(Double.valueOf(attributes[13]))); //home shots on target
 //            variable.add(new Double(Double.valueOf(attributes[14]))); //away SoT
             variables.add(variable);
+
+            Team team = new Team(attributes[2],Double.valueOf(attributes[23]), Double.valueOf(attributes[24]));
+            if(!sameTeam(teams, team)) {
+                teams.add(team);
+            }
         }
+    }
+
+    private boolean sameTeam(Vector<Team> teams, Team team) {
+        for(Team a : teams) {
+            if(a.getName().equals(team.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Double calculateLikelihood(List<Double> probability) {
@@ -306,5 +310,9 @@ public class Logistic {
             }
         }
         return sum/matchResults.size();
+    }
+
+    public Vector<Team> getTeams() {
+        return teams;
     }
 }
